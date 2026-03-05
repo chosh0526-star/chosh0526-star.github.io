@@ -1,0 +1,21 @@
+{
+  "name": "The Archive Planner",
+  "short_name": "Planner",
+  "description": "나만의 일정을 관리하는 완벽한 플래너",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f4f9",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "1634x1636",
+      "type": "image/png"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}

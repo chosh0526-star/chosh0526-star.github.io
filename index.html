@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 플래너</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="calendar-wrapper">
+        <header class="calendar-header">
+            <button id="prev-btn">◀</button>
+            <h2 id="month-year-display">2026년 2월</h2>
+            <button id="next-btn">▶</button>
+        </header>
+        
+        <div class="calendar-grid">
+            <div class="weekdays">
+                <div class="weekday">일</div><div class="weekday">월</div><div class="weekday">화</div>
+                <div class="weekday">수</div><div class="weekday">목</div><div class="weekday">금</div><div class="weekday">토</div>
+            </div>
+            
+            <div id="days-container" class="days-container"></div>
+        </div>
+    </div>
+
+    <div id="overlay" class="overlay"></div>
+
+    <div id="schedule-modal" class="modal">
+        <div class="modal-header">
+            <h3>새 일정 추가</h3>
+            <button id="close-modal-btn">✕</button>
+        </div>
+        <div class="modal-content">
+            <label>일정 제목</label>
+            <input type="text" id="schedule-title" placeholder="무엇을 할 계획인가요?">
+
+            <label>날짜</label>
+            <input type="text" id="schedule-date" readonly>
+
+            <label>카테고리</label>
+            <select id="schedule-category">
+                <option value="personal">개인</option>
+                <option value="work">업무</option>
+                <option value="study">학업</option>
+            </select>
+
+            <label>카테고리</label>
+            <select id="schedule-category">
+                <option value="personal">개인</option>
+                <option value="work">업무</option>
+                <option value="study">학업</option>
+            </select>
+
+            <button id="save-btn" class="save-btn">저장하기</button>
+            
+            <button id="delete-btn" class="delete-btn" style="display: none;">삭제하기</button>
+        </div>
+    </div>
+            
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+</html>
