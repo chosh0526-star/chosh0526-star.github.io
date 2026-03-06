@@ -102,3 +102,357 @@ body { background-color: #f4f4f9; font-family: sans-serif; margin: 0; padding: 2
 .delete-btn:hover { 
     background-color: #dc2626; 
 }
+
+/* 라이트 모드일 때 오늘 날짜 디자인 */
+.today {
+    background-color: #dbeafe;
+    color: #1e40af;
+    border: 2px solid #bfdbfe;
+}
+
+/* ==========================================
+   🌙 진짜 뼈대에 맞춘 완벽한 다크 모드 (사진 맞춤형 딥-다크톤)
+========================================== */
+
+/* 1. 전체 배경 (사진처럼 깊고 완벽한 블랙) */
+body.dark-mode {
+    background-color: #000000 !important; 
+    color: #f2f2f7 !important; 
+}
+
+/* 2. 🎯 진짜 달력 겉면 박스 (사진 속 메모장 겉면 같은 딥 그레이) */
+body.dark-mode .calendar-wrapper {
+    background-color: #1c1c1e !important; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important; 
+    color: #f2f2f7 !important;
+    border: 1px solid #2c2c2e !important; /* 은은한 테두리로 고급스러움 추가 */
+}
+
+/* 3. 연월 헤더 및 요일 글자색 */
+body.dark-mode .calendar-header h2,
+body.dark-mode .weekday,
+body.dark-mode .weekdays {
+    color: #e5e5ea !important; 
+}
+
+/* 4. 날짜 칸 (Day Cell) - 튀지 않는 차분한 테두리선 */
+body.dark-mode .day-cell {
+    background-color: #1c1c1e !important; 
+    border: 1px solid #2c2c2e !important; 
+    border-radius: 8px !important; 
+    color: #f2f2f7 !important;
+}
+body.dark-mode .day-cell:hover {
+    background-color: #2c2c2e !important; 
+}
+
+/* 5. 새 일정 추가 팝업창 (달력 본체와 톤 통일) */
+body.dark-mode .modal,
+body.dark-mode .modal-content {
+    background-color: #1c1c1e !important; 
+    color: #f2f2f7 !important;
+    border: 1px solid #2c2c2e !important;
+}
+body.dark-mode .modal-header {
+    border-bottom: 1px solid #2c2c2e !important;
+}
+body.dark-mode .modal-header h3,
+body.dark-mode .close-modal-btn {
+    color: #f2f2f7 !important;
+}
+
+/* 6. 모달창 안의 입력칸 및 라벨 */
+body.dark-mode label {
+    color: #aeaeb2 !important; /* 라벨은 살짝 더 연한 회색으로 */
+}
+body.dark-mode input, 
+body.dark-mode select {
+    background-color: #2c2c2e !important;
+    color: #f2f2f7 !important;
+    border: 1px solid #3a3a3c !important;
+}
+body.dark-mode input::placeholder {
+    color: #8e8e93 !important; 
+}
+
+/* 7. 버튼들도 다크 모드 톤에 맞게 차분하게 변경 */
+body.dark-mode .theme-toggle-btn {
+    background-color: #2c2c2e !important;
+    border-color: #3a3a3c !important;
+    color: #f2f2f7 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.8) !important;
+}
+body.dark-mode .view-toggle-btn {
+    background-color: #2c2c2e !important;
+    color: #f2f2f7 !important;
+    border: 1px solid #3a3a3c !important;
+}
+body.dark-mode .view-toggle-btn:hover {
+    background-color: #3a3a3c !important;
+}
+
+/* ==========================================
+   🎯 다크 모드 스위치 버튼 예쁘게 다듬기 (모양 복구)
+========================================== */
+.theme-toggle-btn {
+    position: fixed !important;
+    bottom: 30px !important;
+    right: 30px !important;
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important; /* 완벽한 동그라미 */
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #ddd !important;
+    font-size: 24px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+    transition: all 0.3s ease !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 다크 모드 켜졌을 때 버튼 색상 (딥-다크톤에 맞춤) */
+body.dark-mode .theme-toggle-btn {
+    background-color: #2c2c2e !important;
+    border: 1px solid #3a3a3c !important;
+    color: #f2f2f7 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.8) !important;
+}
+
+/* ==========================================
+   📅 월간/주간 전환 버튼 디자인
+========================================== */
+.view-toggle-btn {
+    margin-left: 20px;
+    padding: 8px 16px;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+.view-toggle-btn:hover {
+    background-color: #4338ca;
+}
+body.dark-mode .view-toggle-btn {
+    background-color: #3730a3;
+}
+
+/* ==========================================
+   📅 주간 모드 켜졌을 때 날짜 칸 크기 조절
+========================================== */
+.calendar-wrapper.weekly-mode .days-container {
+    /* 주간 모드일 때는 여러 줄이 아니라 딱 한 줄만 크게 렌더링 */
+    grid-template-rows: 1fr; 
+}
+.calendar-wrapper.weekly-mode .day-cell {
+    /* 주간 모드일 때는 칸 높이를 300px 이상으로 시원하게 확보 */
+    min-height: 350px; 
+}
+
+/* ==========================================
+   🍔 사이드바 & 햄버거 버튼 디자인
+========================================== */
+.calendar-header {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.header-center {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.sidebar-toggle-btn {
+    position: absolute;
+    left: 20px;
+    font-size: 28px;
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.sidebar-toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+/* 사이드바 본체 (평소엔 왼쪽 화면 밖에 숨어있음) */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px; /* 숨김 처리 */
+    width: 280px;
+    height: 100%;
+    background-color: #ffffff;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+    transition: left 0.3s ease-in-out;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+}
+.sidebar.active {
+    left: 0; /* 클래스가 붙으면 화면으로 스르륵 나옴 */
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+.close-sidebar-btn {
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.sidebar-content {
+    padding: 20px;
+}
+
+/* 사이드바 안의 메뉴 버튼들 */
+.sidebar-menu-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: #f3f4f6;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: left;
+    transition: background-color 0.2s;
+}
+.sidebar-menu-btn:hover {
+    background-color: #e5e7eb;
+}
+
+/* 사이드바 열렸을 때 뒤에 깔리는 어두운 배경 */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    z-index: 1500;
+}
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ==========================================
+   🌙 사이드바 다크 모드 (딥-다크톤) 적용
+========================================== */
+body.dark-mode .sidebar-toggle-btn {
+    color: #e5e5ea !important;
+}
+body.dark-mode .sidebar {
+    background-color: #1c1c1e !important;
+    border-right: 1px solid #2c2c2e !important;
+}
+body.dark-mode .sidebar-header {
+    border-bottom: 1px solid #2c2c2e !important;
+}
+body.dark-mode .sidebar-header h2,
+body.dark-mode .close-sidebar-btn {
+    color: #e5e5ea !important;
+}
+body.dark-mode .sidebar-menu-btn {
+    background-color: #2c2c2e !important;
+    color: #f2f2f7 !important;
+}
+body.dark-mode .sidebar-menu-btn:hover {
+    background-color: #3a3a3c !important;
+}
+
+/* ==========================================
+   🏷️ 카테고리 관리 모달창 디자인
+========================================== */
+.category-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f3f4f6;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+.category-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+}
+.category-color-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+}
+.delete-cat-btn {
+    background-color: #ff3b30;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* 다크 모드용 색상 적용 */
+body.dark-mode .category-item {
+    background-color: #2c2c2e !important;
+    color: #f2f2f7 !important;
+}
+
+/* ==========================================
+   🎯 폼 요소(입력칸, 선택창, 버튼) 폰트 강제 통일
+========================================== */
+input, select, button, textarea {
+    font-family: inherit !important;
+}
+
+/* ==========================================
+   🎯 긴 일정 이름 폭주 완벽 차단 (부모+자식 동시 통제)
+========================================== */
+
+/* 1. 부모 박스(날짜 칸) 강제 고정: 글자 길다고 늘어나지 마! */
+.day-cell {
+    min-width: 0 !important; 
+    overflow: hidden !important; 
+}
+
+/* 2. 일정 바 글자 자르기: 남는 건 말줄임표(...) 처리! */
+.schedule-bar {
+    width: 100% !important;              /* 부모 너비에 딱 맞춰! */
+    white-space: nowrap !important;      /* 절대 줄바꿈 하지 마! */
+    overflow: hidden !important;         /* 박스 밖으로 나가면 숨겨! */
+    text-overflow: ellipsis !important;  /* 숨겨진 글자 끝엔 ... 붙여! */
+    box-sizing: border-box !important;   
+    display: block !important;
+}

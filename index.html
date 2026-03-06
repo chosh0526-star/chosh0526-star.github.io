@@ -13,11 +13,29 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <button id="theme-toggle" class="theme-toggle-btn">🌙</button>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h2>메뉴</h2>
+            <button id="close-sidebar-btn" class="close-sidebar-btn">✕</button>
+        </div>
+        <div class="sidebar-content">
+            <button id="view-toggle-btn" class="sidebar-menu-btn">주간 보기</button>
+            <button id="manage-category-btn" class="sidebar-menu-btn" style="margin-top: 10px;">🏷️ 카테고리 관리</button>
+        </div>
+    </div>
+
     <div class="calendar-wrapper">
         <header class="calendar-header">
-            <button id="prev-btn">◀</button>
-            <h2 id="month-year-display">2026년 2월</h2>
-            <button id="next-btn">▶</button>
+            <button id="sidebar-toggle-btn" class="sidebar-toggle-btn">☰</button>
+            
+            <div class="header-center">
+                <button id="prev-btn">◀</button>
+                <h2 id="month-year-display">2026년 3월</h2>
+                <button id="next-btn">▶</button>
+            </div>
         </header>
         
         <div class="calendar-grid">
@@ -25,7 +43,6 @@
                 <div class="weekday">일</div><div class="weekday">월</div><div class="weekday">화</div>
                 <div class="weekday">수</div><div class="weekday">목</div><div class="weekday">금</div><div class="weekday">토</div>
             </div>
-            
             <div id="days-container" class="days-container"></div>
         </div>
     </div>
@@ -41,8 +58,11 @@
             <label>일정 제목</label>
             <input type="text" id="schedule-title" placeholder="무엇을 할 계획인가요?">
 
-            <label>날짜</label>
+            <label>날짜 (시작일)</label>
             <input type="text" id="schedule-date" readonly>
+
+            <label>종료일 (선택: 연속 일정용)</label>
+            <input type="date" id="schedule-range-end" style="margin-bottom: 15px;">
 
             <label>카테고리</label>
             <select id="schedule-category">
@@ -51,15 +71,45 @@
                 <option value="study">학업</option>
             </select>
 
+            <div id="repeat-ui-group" style="margin-top: 15px;">
+                <label>반복 설정</label>
+                <select id="schedule-repeat">
+                    <option value="none">반복 안 함</option>
+                    <option value="daily">매일</option>
+                    <option value="weekly">매주</option>
+                    <option value="monthly">매월</option>
+                    <option value="yearly">매년</option>
+                </select>
+
+                <div id="repeat-end-container" style="display: none; margin-top: 10px;">
+                    <label>반복 종료일</label>
+                    <input type="date" id="schedule-repeat-end">
+                </div>
+            </div>
+
             <button id="save-btn" class="save-btn">저장하기</button>
             <button id="delete-btn" class="delete-btn" style="display: none;">삭제하기</button>
         </div>
     </div>
-            
-        </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <div id="category-modal" class="modal">
+        <div class="modal-header">
+            <h3>카테고리 관리</h3>
+            <button id="close-category-btn" class="close-modal-btn">✕</button>
+        </div>
+        <div class="modal-content">
+            <ul id="category-list" class="category-list"></ul>
+            
+            <hr style="border: 0; border-top: 1px solid #3a3a3c; margin: 15px 0;">
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="color" id="new-category-color" value="#4f46e5" style="width: 50px; height: 40px; padding: 0; border: none; cursor: pointer;">
+                <input type="text" id="new-category-name" placeholder="새 카테고리 이름" style="flex: 1;">
+            </div>
+            <button id="add-category-btn" class="save-btn" style="margin-top: 15px;">추가하기</button>
+        </div>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>
