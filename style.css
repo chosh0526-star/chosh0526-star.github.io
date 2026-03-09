@@ -274,3 +274,43 @@ body.dark-mode .submenu-btn:hover {
 body.dark-mode #todo-sidebar-btn {
     color: #e5e5ea !important;
 }
+
+/* ==========================================
+   📱 모바일 주간 보기 (가로 스크롤 & 스와이프 완벽 지원)
+========================================== */
+@media (max-width: 600px) {
+    /* 1. 주간 모드일 때 달력 뼈대를 가로로 스크롤할 수 있게 만듦 */
+    .calendar-wrapper.weekly-mode .calendar-grid {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important; /* 아이폰 스와이프 부드럽게 */
+        padding-bottom: 15px !important; /* 스크롤바 짤림 방지 */
+    }
+
+    /* 2. 요일과 날짜 칸이 좁은 폰 화면에 찌그러지지 않고, 한 칸당 120px의 넓이를 쫙 펴고 유지하도록 강제함 */
+    .calendar-wrapper.weekly-mode .weekdays,
+    .calendar-wrapper.weekly-mode .days-container {
+        display: grid !important;
+        grid-template-columns: repeat(7, 120px) !important; /* 7칸 * 120px = 총 840px로 길어짐! */
+        width: max-content !important; 
+        gap: 10px !important;
+    }
+
+    /* 3. 모바일 주간 보기의 세로 길이를 폰 화면에 쏙 들어가게 최적화 */
+    .calendar-wrapper.weekly-mode .day-cell {
+        min-height: 250px !important; 
+    }
+
+    /* 🎯 4. 넓이가 충분해졌으므로, 좁은 '점(Dot)' 모양을 원래의 '글씨 바(Bar)' 모양으로 화려하게 부활! */
+    .calendar-wrapper.weekly-mode .schedule-bar {
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 4px !important;
+        padding: 4px 8px !important;
+        color: #ffffff !important; /* 투명했던 글씨 부활! */
+        display: block !important;
+        margin-top: 6px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}
