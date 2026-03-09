@@ -1,29 +1,55 @@
+// ==========================================
+// 🎯 투두리스트 전용 사이드바 버튼 연결
+// ==========================================
+const todoSidebarBtn = document.getElementById('todo-sidebar-btn');
+const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+const sidebar = document.getElementById('sidebar');
+const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+if (todoSidebarBtn) {
+    todoSidebarBtn.addEventListener('click', () => {
+        sidebar.classList.add('active');
+        sidebarOverlay.classList.add('active');
+    });
+}
+sidebarToggleBtn.addEventListener('click', () => {
+    sidebar.classList.add('active');
+    sidebarOverlay.classList.add('active');
+});
+
+function closeSidebar() {
+    sidebar.classList.remove('active');
+    sidebarOverlay.classList.remove('active');
+}
+closeSidebarBtn.addEventListener('click', closeSidebar);
+sidebarOverlay.addEventListener('click', closeSidebar);
+
+// ==========================================
+// 공통 변수 및 UI 요소
+// ==========================================
 const monthYearDisplay = document.getElementById('month-year-display');
 const daysContainer = document.getElementById('days-container');
 const prevBtn = document.getElementById('prev-btn');
 const nextBtn = document.getElementById('next-btn');
 const viewToggleBtn = document.getElementById('view-toggle-btn');
 
-const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
-const sidebar = document.getElementById('sidebar');
-const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-const sidebarOverlay = document.getElementById('sidebar-overlay');
-
 const scheduleModal = document.getElementById('schedule-modal');
 const categoryModal = document.getElementById('category-modal');
+const rangeModal = document.getElementById('range-modal'); 
 const overlay = document.getElementById('overlay');
+
 const closeModalBtn = document.getElementById('close-modal-btn');
 const closeCategoryBtn = document.getElementById('close-category-btn');
+const closeRangeBtn = document.getElementById('close-range-btn'); 
 
 const scheduleDateInput = document.getElementById('schedule-date');
-// 🎯 범위 일정용 종료일 요소 가져오기
 const scheduleRangeEndInput = document.getElementById('schedule-range-end');
-
 const saveBtn = document.getElementById('save-btn');
 const deleteBtn = document.getElementById('delete-btn');
 const scheduleTitleInput = document.getElementById('schedule-title');
 const scheduleCategoryInput = document.getElementById('schedule-category');
-const modalTitle = document.querySelector('.modal-header h3');
+const modalTitle = document.querySelector('#schedule-modal .modal-header h3');
 
 const repeatUiGroup = document.getElementById('repeat-ui-group');
 const scheduleRepeatInput = document.getElementById('schedule-repeat');
@@ -31,7 +57,10 @@ const repeatEndContainer = document.getElementById('repeat-end-container');
 const scheduleRepeatEndInput = document.getElementById('schedule-repeat-end');
 
 const manageCategoryBtn = document.getElementById('manage-category-btn');
+const manageRangeBtn = document.getElementById('manage-range-btn'); 
 const categoryListUl = document.getElementById('category-list');
+const rangeListUl = document.getElementById('range-list'); 
+
 const newCategoryName = document.getElementById('new-category-name');
 const newCategoryColor = document.getElementById('new-category-color');
 const addCategoryBtn = document.getElementById('add-category-btn');
@@ -44,36 +73,37 @@ let currentDate = new Date();
 let schedulesList = [];
 let categoriesList = []; 
 let currentEditId = null;
+let currentEditGroupId = null; 
 let isWeeklyView = false;
 
-// UI 제어 (사이드바, 모달)
-sidebarToggleBtn.addEventListener('click', () => {
-    sidebar.classList.add('active');
-    sidebarOverlay.classList.add('active');
+// 🎯 파트너님이 요청하신 이모티콘 고정!
+viewToggleBtn.addEventListener('click', () => {
+    isWeeklyView = !isWeeklyView;
+    viewToggleBtn.textContent = isWeeklyView ? '🗓️ 월간 보기' : '📆 주간 보기';
+    document.querySelector('.calendar-wrapper').classList.toggle('weekly-mode', isWeeklyView);
+    renderCalendar();
+    closeSidebar();
 });
-
-function closeSidebar() {
-    sidebar.classList.remove('active');
-    sidebarOverlay.classList.remove('active');
-}
-closeSidebarBtn.addEventListener('click', closeSidebar);
-sidebarOverlay.addEventListener('click', closeSidebar);
-viewToggleBtn.addEventListener('click', closeSidebar);
 
 function closeAllModals() {
     scheduleModal.classList.remove('active');
     categoryModal.classList.remove('active');
+    rangeModal.classList.remove('active');
     overlay.classList.remove('active');
+    currentEditGroupId = null; 
 }
 closeModalBtn.addEventListener('click', closeAllModals);
 closeCategoryBtn.addEventListener('click', closeAllModals);
+closeRangeBtn.addEventListener('click', closeAllModals);
 overlay.addEventListener('click', closeAllModals);
 
 scheduleRepeatInput.addEventListener('change', (e) => {
     repeatEndContainer.style.display = e.target.value === 'none' ? 'none' : 'block';
 });
 
-// 카테고리 로직
+// ==========================================
+// 🏷️ 카테고리 로직 (순서 변경 완벽 개선판 🚀)
+// ==========================================
 manageCategoryBtn.addEventListener('click', () => {
     closeSidebar();
     categoryModal.classList.add('active');
@@ -81,28 +111,79 @@ manageCategoryBtn.addEventListener('click', () => {
 });
 
 async function loadCategories() {
-    const { data, error } = await supabaseClient.from('categories').select('*');
-    if (!error) {
+    // 순서 번호(sort_order) 기준으로 가져오기
+    const { data, error } = await supabaseClient.from('categories').select('*').order('sort_order', { ascending: true });
+    
+    if (error) {
+        console.error("카테고리 에러:", error);
+    } else {
         categoriesList = data;
         renderCategoryManager();
         updateCategoryDropdown();
-        loadSchedules(); 
     }
+    
+    // 에러가 나든 안 나든 캘린더는 무조건 그리기!
+    loadSchedules(); 
 }
 
 function renderCategoryManager() {
     categoryListUl.innerHTML = '';
-    categoriesList.forEach(cat => {
+    categoriesList.forEach((cat, index) => {
         const li = document.createElement('li');
         li.className = 'category-item';
+        
         li.innerHTML = `
             <div class="category-info">
                 <div class="category-color-dot" style="background-color: ${cat.color}"></div>
                 <span>${cat.name}</span>
             </div>
-            <button class="delete-cat-btn" data-id="${cat.id}">삭제</button>
+            <div style="display:flex; gap: 8px; align-items:center;">
+                <button class="move-up-btn" data-index="${index}" style="background:none; border:none; cursor:pointer; font-size: 16px; color:#888;">▲</button>
+                <button class="move-down-btn" data-index="${index}" style="background:none; border:none; cursor:pointer; font-size: 16px; color:#888;">▼</button>
+                <button class="delete-cat-btn" data-id="${cat.id}">삭제</button>
+            </div>
         `;
         categoryListUl.appendChild(li);
+    });
+
+    // 🎯 ▲ 위로 이동 (배열 위치 바꾸고 전체 번호표 깔끔하게 재정렬)
+    document.querySelectorAll('.move-up-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const index = parseInt(e.target.getAttribute('data-index'));
+            if (index > 0) {
+                // 1. 메모리상에서 둘의 위치를 맞바꿈
+                const temp = categoriesList[index];
+                categoriesList[index] = categoriesList[index - 1];
+                categoriesList[index - 1] = temp;
+
+                // 2. 바뀐 순서대로 0, 1, 2... 번호표를 전체 데이터에 싹 다시 덮어씌움! (버그 원천 차단)
+                const updates = categoriesList.map((cat, i) => 
+                    supabaseClient.from('categories').update({ sort_order: i }).eq('id', cat.id)
+                );
+                await Promise.all(updates); // 한방에 저장 처리
+                loadCategories();
+            }
+        });
+    });
+
+    // 🎯 ▼ 아래로 이동
+    document.querySelectorAll('.move-down-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const index = parseInt(e.target.getAttribute('data-index'));
+            if (index < categoriesList.length - 1) {
+                // 1. 메모리상에서 둘의 위치를 맞바꿈
+                const temp = categoriesList[index];
+                categoriesList[index] = categoriesList[index + 1];
+                categoriesList[index + 1] = temp;
+
+                // 2. 바뀐 순서대로 0, 1, 2... 번호표 싹 다시 덮어씌움
+                const updates = categoriesList.map((cat, i) => 
+                    supabaseClient.from('categories').update({ sort_order: i }).eq('id', cat.id)
+                );
+                await Promise.all(updates);
+                loadCategories();
+            }
+        });
     });
 
     document.querySelectorAll('.delete-cat-btn').forEach(btn => {
@@ -132,16 +213,26 @@ addCategoryBtn.addEventListener('click', async () => {
     if (!name) return alert('이름을 입력하세요!');
 
     addCategoryBtn.textContent = '처리 중...';
-    const { error } = await supabaseClient.from('categories').insert([{ name, color }]);
-    if (error) alert('추가 실패!');
-    else { newCategoryName.value = ''; loadCategories(); }
+    
+    // 🎯 새 카테고리는 무조건 리스트의 제일 마지막 번호(length)를 부여받음
+    const newSortOrder = categoriesList.length; 
+    
+    await supabaseClient.from('categories').insert([{ name, color, sort_order: newSortOrder }]);
+    newCategoryName.value = ''; 
+    loadCategories();
     addCategoryBtn.textContent = '추가하기';
 });
 
-// 달력 렌더링
+// ==========================================
+// 📅 달력 및 범위 일정 렌더링 로직
+// ==========================================
 async function loadSchedules() {
     const { data, error } = await supabaseClient.from('schedules').select('*');
-    if (!error) { schedulesList = data; renderCalendar(); }
+    if (!error) { 
+        schedulesList = data; 
+    }
+    // 🎯 데이터가 있든 없든 뼈대는 무조건 그리기!
+    renderCalendar(); 
 }
 
 function renderCalendar() {
@@ -216,13 +307,6 @@ function createDayCell(cellYear, cellMonth, cellDateNum) {
     daysContainer.appendChild(dayCell);
 }
 
-viewToggleBtn.addEventListener('click', () => {
-    isWeeklyView = !isWeeklyView;
-    viewToggleBtn.textContent = isWeeklyView ? '월간 보기' : '주간 보기';
-    document.querySelector('.calendar-wrapper').classList.toggle('weekly-mode', isWeeklyView);
-    renderCalendar();
-});
-
 prevBtn.addEventListener('click', () => { 
     if(isWeeklyView) currentDate.setDate(currentDate.getDate() - 7);
     else currentDate.setMonth(currentDate.getMonth() - 1); 
@@ -235,11 +319,104 @@ nextBtn.addEventListener('click', () => {
     renderCalendar(); 
 });
 
-// 🎯 저장 로직 (단일/범위/반복 모두 통합)
+manageRangeBtn.addEventListener('click', () => {
+    closeSidebar();
+    rangeModal.classList.add('active');
+    overlay.classList.add('active');
+    renderRangeManager();
+});
+
+function renderRangeManager() {
+    rangeListUl.innerHTML = '';
+    const groups = {};
+    schedulesList.forEach(s => {
+        if (s.group_id) {
+            if (!groups[s.group_id]) groups[s.group_id] = [];
+            groups[s.group_id].push(s);
+        }
+    });
+
+    Object.keys(groups).forEach(groupId => {
+        const groupSchedules = groups[groupId];
+        groupSchedules.sort((a,b) => {
+            const parseDate = (d) => {
+                const m = d.match(/(\d+)년 (\d+)월 (\d+)일/);
+                return new Date(m[1], m[2]-1, m[3]).getTime();
+            };
+            return parseDate(a.date) - parseDate(b.date);
+        });
+
+        const start = groupSchedules[0].date;
+        const end = groupSchedules[groupSchedules.length-1].date;
+        const title = groupSchedules[0].title;
+
+        const li = document.createElement('li');
+        li.className = 'category-item'; 
+        li.innerHTML = `
+            <div class="category-info" style="flex-direction: column; align-items: flex-start; gap: 5px;">
+                <span style="font-weight: bold; color: inherit;">${title}</span>
+                <span style="font-size: 12px; color: #888;">${start} ~ ${end} (${groupSchedules.length}개)</span>
+            </div>
+            <div style="display:flex; gap: 5px;">
+                <button class="edit-group-btn" data-id="${groupId}" style="background-color: #4f46e5; color: white; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 12px;">수정</button>
+                <button class="delete-group-btn" data-id="${groupId}" style="background-color: #ff3b30; color: white; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 12px;">삭제</button>
+            </div>
+        `;
+        rangeListUl.appendChild(li);
+    });
+
+    document.querySelectorAll('.edit-group-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const groupId = e.target.getAttribute('data-id');
+            const groupSchedules = groups[groupId];
+            
+            rangeModal.classList.remove('active'); 
+            scheduleModal.classList.add('active'); 
+            
+            scheduleTitleInput.value = groupSchedules[0].title;
+            scheduleCategoryInput.value = groupSchedules[0].category;
+            scheduleDateInput.value = groupSchedules[0].date; 
+            
+            const lastDate = groupSchedules[groupSchedules.length-1].date;
+            const m = lastDate.match(/(\d+)년 (\d+)월 (\d+)일/);
+            const formattedEnd = `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
+            
+            scheduleRangeEndInput.value = formattedEnd;
+            scheduleRangeEndInput.style.display = 'block';
+
+            repeatUiGroup.style.display = 'none';
+            scheduleRepeatInput.value = 'none';
+
+            modalTitle.textContent = '범위 일정 [그룹 통째로 수정]';
+            saveBtn.textContent = '수정 적용하기';
+            deleteBtn.style.display = 'none';
+
+            currentEditId = null; 
+            currentEditGroupId = groupId; 
+        });
+    });
+
+    document.querySelectorAll('.delete-group-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const groupId = e.target.getAttribute('data-id');
+            if (confirm('이 범위로 묶인 일정들을 모두 삭제하시겠습니까?')) {
+                await supabaseClient.from('schedules').delete().eq('group_id', groupId);
+                loadSchedules();
+                renderRangeManager(); 
+            }
+        });
+    });
+}
+
+// ==========================================
+// 🎯 일정 저장 및 삭제
+// ==========================================
 function openModal(dateString, schedule = null) {
     scheduleDateInput.value = dateString;
     scheduleModal.classList.add('active');
     overlay.classList.add('active');
+    currentEditGroupId = null; 
+    deleteBtn.textContent = '삭제하기'; 
 
     if (schedule) {
         currentEditId = schedule.id;
@@ -249,7 +426,7 @@ function openModal(dateString, schedule = null) {
         if(scheduleRangeEndInput) scheduleRangeEndInput.style.display = 'none';
         if(repeatUiGroup) repeatUiGroup.style.display = 'none';
 
-        modalTitle.textContent = '일정 수정';
+        modalTitle.textContent = '개별 일정 수정';
         saveBtn.textContent = '수정 완료';
         deleteBtn.style.display = 'block';
     } else {
@@ -282,11 +459,14 @@ saveBtn.addEventListener('click', async () => {
     const repeatEnd = scheduleRepeatEndInput.value;
 
     if (!title) { alert('제목을 입력해주세요!'); return; }
-    if (!currentEditId && repeatType !== 'none' && !repeatEnd) { alert('반복 종료일을 선택해주세요!'); return; }
 
     saveBtn.textContent = '처리 중...';
 
-    if (currentEditId) {
+    if (currentEditGroupId) {
+        await supabaseClient.from('schedules').delete().eq('group_id', currentEditGroupId);
+    }
+
+    if (currentEditId && !currentEditGroupId) {
         await supabaseClient.from('schedules').update({ title, date, category }).eq('id', currentEditId);
     } else {
         const inserts = [];
@@ -297,15 +477,11 @@ saveBtn.addEventListener('click', async () => {
         let step = 0; 
         let stepType = 'days';
 
-        // 1. 범위 일정이 설정된 경우 (최우선 처리)
         if (rangeEnd) {
             finalEndDate = new Date(rangeEnd);
             finalEndDate.setHours(23, 59, 59, 999);
-            step = 1; 
-            stepType = 'days';
-        } 
-        // 2. 반복 일정이 설정된 경우
-        else if (repeatType !== 'none' && repeatEnd) {
+            step = 1; stepType = 'days';
+        } else if (repeatType !== 'none' && repeatEnd) {
             finalEndDate = new Date(repeatEnd);
             finalEndDate.setHours(23, 59, 59, 999);
             if (repeatType === 'daily') { step = 1; stepType = 'days'; }
@@ -314,13 +490,20 @@ saveBtn.addEventListener('click', async () => {
             if (repeatType === 'yearly') { step = 1; stepType = 'years'; }
         }
 
+        const isGroup = step > 0 || currentEditGroupId;
+        const groupIdToUse = currentEditGroupId || (isGroup ? 'group_' + Date.now() : null);
+
         while (targetDate <= finalEndDate) {
             const formattedDate = `${targetDate.getFullYear()}년 ${targetDate.getMonth() + 1}월 ${targetDate.getDate()}일`;
-            inserts.push({ title, date: formattedDate, category });
+            inserts.push({ 
+                title, 
+                date: formattedDate, 
+                category,
+                ...(groupIdToUse && { group_id: groupIdToUse })
+            });
 
-            if (step === 0) break; // 일반 일정이면 바로 탈출
+            if (step === 0) break;
 
-            // 날짜 건너뛰기 계산
             if (stepType === 'days') targetDate.setDate(targetDate.getDate() + step);
             else if (stepType === 'months') targetDate.setMonth(targetDate.getMonth() + step);
             else if (stepType === 'years') targetDate.setFullYear(targetDate.getFullYear() + step);
@@ -329,13 +512,15 @@ saveBtn.addEventListener('click', async () => {
         const { error } = await supabaseClient.from('schedules').insert(inserts);
         if(error) alert('일정 저장 중 문제가 발생했습니다.');
     }
+    
+    currentEditGroupId = null; 
     closeAllModals(); 
     loadSchedules();
 });
 
 deleteBtn.addEventListener('click', async () => {
     if (!currentEditId) return;
-    if (confirm('삭제하시겠습니까?')) {
+    if (confirm('이 개별 일정 하나만 삭제하시겠습니까?')) {
         deleteBtn.textContent = '삭제 중...';
         await supabaseClient.from('schedules').delete().eq('id', currentEditId);
         closeAllModals(); 
@@ -343,10 +528,7 @@ deleteBtn.addEventListener('click', async () => {
     }
 });
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(console.error); });
-}
-
+// 다크모드
 const themeToggleBtn = document.getElementById('theme-toggle');
 if (localStorage.getItem('theme') === 'dark') {
     document.body.classList.add('dark-mode');
@@ -363,4 +545,148 @@ themeToggleBtn.addEventListener('click', () => {
     }
 });
 
+// ==========================================
+// 📝 투두리스트 (할 일) 및 사이드바 제어 로직
+// ==========================================
+const todoInput = document.getElementById('todo-input');
+const addTodoBtn = document.getElementById('add-todo-btn');
+const todoListUl = document.getElementById('todo-list');
+
+const todoMenuBtn = document.getElementById('todo-menu-btn');
+const todoSubmenu = document.getElementById('todo-submenu');
+const todoMenuArrow = document.getElementById('todo-menu-arrow');
+const mainScreenBtn = document.getElementById('main-screen-btn'); 
+const calendarWrapper = document.querySelector('.calendar-wrapper'); 
+
+let todosList = [];
+let currentTodoFilter = 'main'; 
+
+if(mainScreenBtn) {
+    mainScreenBtn.addEventListener('click', () => {
+        calendarWrapper.classList.remove('hidden-section'); 
+        currentTodoFilter = 'main'; 
+        renderTodos();
+        closeSidebar();
+    });
+}
+
+if(todoMenuBtn) {
+    todoMenuBtn.addEventListener('click', () => {
+        todoSubmenu.classList.toggle('active');
+        todoMenuArrow.textContent = todoSubmenu.classList.contains('active') ? '▲' : '▼';
+    });
+}
+
+document.querySelectorAll('.submenu-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        currentTodoFilter = e.target.getAttribute('data-filter'); 
+        calendarWrapper.classList.add('hidden-section');
+        renderTodos(); 
+        closeSidebar(); 
+    });
+});
+
+async function loadTodos() {
+    const { data, error } = await supabaseClient.from('todos').select('*').order('id', { ascending: true });
+    if (!error) {
+        todosList = data;
+        renderTodos();
+    }
+}
+
+function renderTodos() {
+    todoListUl.innerHTML = '';
+    
+    const filteredTodos = todosList.filter(todo => {
+        if (currentTodoFilter === 'active' || currentTodoFilter === 'main') return !todo.is_completed;
+        if (currentTodoFilter === 'completed') return todo.is_completed;
+        return true; 
+    });
+
+    if (filteredTodos.length === 0) {
+        const li = document.createElement('li');
+        li.style.padding = '15px';
+        li.style.textAlign = 'center';
+        li.style.color = '#888';
+        li.textContent = '해당하는 할 일이 없습니다.';
+        todoListUl.appendChild(li);
+        return;
+    }
+
+    filteredTodos.forEach(todo => {
+        const li = document.createElement('li');
+        li.className = `todo-item ${todo.is_completed ? 'completed' : ''}`;
+        li.innerHTML = `
+            <div class="todo-content">
+                <input type="checkbox" class="todo-checkbox" data-id="${todo.id}" ${todo.is_completed ? 'checked' : ''}>
+                <span class="todo-text">${todo.task}</span>
+            </div>
+            <button class="todo-delete-btn" data-id="${todo.id}">🗑️</button>
+        `;
+        todoListUl.appendChild(li);
+    });
+
+    document.querySelectorAll('.todo-checkbox').forEach(box => {
+        box.addEventListener('change', (e) => {
+            const id = e.target.getAttribute('data-id');
+            const is_completed = e.target.checked;
+            const liElement = e.target.closest('.todo-item');
+
+            supabaseClient.from('todos').update({ is_completed }).eq('id', id);
+            
+            const targetTodo = todosList.find(t => t.id == id);
+            if(targetTodo) targetTodo.is_completed = is_completed;
+
+            if (((currentTodoFilter === 'active' || currentTodoFilter === 'main') && is_completed) || 
+                (currentTodoFilter === 'completed' && !is_completed)) {
+                
+                liElement.classList.add('fade-out-item'); 
+                setTimeout(() => { renderTodos(); }, 300); 
+            } else {
+                if(is_completed) liElement.classList.add('completed');
+                else liElement.classList.remove('completed');
+            }
+        });
+    });
+
+    document.querySelectorAll('.todo-delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = e.target.getAttribute('data-id');
+            const liElement = e.target.closest('.todo-item');
+            
+            liElement.classList.add('fade-out-item'); 
+            supabaseClient.from('todos').delete().eq('id', id); 
+            todosList = todosList.filter(t => t.id != id); 
+            
+            setTimeout(() => { renderTodos(); }, 300); 
+        });
+    });
+}
+
+addTodoBtn.addEventListener('click', async () => {
+    const task = todoInput.value.trim();
+    if (!task) return alert('할 일을 입력하세요!');
+    
+    addTodoBtn.textContent = '...';
+    const { error } = await supabaseClient.from('todos').insert([{ task, is_completed: false }]);
+    
+    if (error) alert('투두 추가 실패!');
+    else {
+        todoInput.value = '';
+        loadTodos();
+    }
+    addTodoBtn.textContent = '추가';
+});
+
+todoInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addTodoBtn.click();
+});
+
+// PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(console.error); });
+}
+
+// 🚀 앱 최초 실행
 loadCategories();
+loadTodos();

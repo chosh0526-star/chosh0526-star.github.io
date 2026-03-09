@@ -22,22 +22,32 @@
             <button id="close-sidebar-btn" class="close-sidebar-btn">✕</button>
         </div>
         <div class="sidebar-content">
-            <button id="view-toggle-btn" class="sidebar-menu-btn">주간 보기</button>
+            <button id="main-screen-btn" class="sidebar-menu-btn">🏠 메인 화면</button>
+            <button id="todo-menu-btn" class="sidebar-menu-btn" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span>📝 투두리스트</span> <span id="todo-menu-arrow" style="font-size: 12px;">▼</span>
+            </button>
+            <div id="todo-submenu" class="sidebar-submenu">
+                <button class="submenu-btn" data-filter="all">• 전체</button>
+                <button class="submenu-btn" data-filter="active">• 진행중</button>
+                <button class="submenu-btn" data-filter="completed">• 완료</button>
+            </div>
+            <button id="view-toggle-btn" class="sidebar-menu-btn" style="margin-top: 10px;">📆 주간 보기</button>
             <button id="manage-category-btn" class="sidebar-menu-btn" style="margin-top: 10px;">🏷️ 카테고리 관리</button>
+            <button id="manage-range-btn" class="sidebar-menu-btn" style="margin-top: 10px;">📅 범위/반복 일정 관리</button>
+            
+            
         </div>
     </div>
 
     <div class="calendar-wrapper">
         <header class="calendar-header">
             <button id="sidebar-toggle-btn" class="sidebar-toggle-btn">☰</button>
-            
             <div class="header-center">
                 <button id="prev-btn">◀</button>
                 <h2 id="month-year-display">2026년 3월</h2>
                 <button id="next-btn">▶</button>
             </div>
         </header>
-        
         <div class="calendar-grid">
             <div class="weekdays">
                 <div class="weekday">일</div><div class="weekday">월</div><div class="weekday">화</div>
@@ -47,12 +57,24 @@
         </div>
     </div>
 
+    <div class="todo-wrapper">
+        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+            <button id="todo-sidebar-btn" class="sidebar-toggle-btn" style="position: static; margin-right: 15px; font-size: 24px;">☰</button>
+            <h3 style="margin: 0;">📝 메모 및 할 일</h3>
+        </div>
+        
+        <div class="todo-input-group">
+            <input type="text" id="todo-input" placeholder="새로운 할 일을 입력하세요... (엔터키로 추가)">
+            <button id="add-todo-btn">추가</button>
+        </div>
+        <ul id="todo-list" class="todo-list"></ul>
+    </div>
     <div id="overlay" class="overlay"></div>
 
     <div id="schedule-modal" class="modal">
         <div class="modal-header">
             <h3>새 일정 추가</h3>
-            <button id="close-modal-btn">✕</button>
+            <button id="close-modal-btn" class="close-modal-btn">✕</button>
         </div>
         <div class="modal-content">
             <label>일정 제목</label>
@@ -65,11 +87,7 @@
             <input type="date" id="schedule-range-end" style="margin-bottom: 15px;">
 
             <label>카테고리</label>
-            <select id="schedule-category">
-                <option value="personal">개인</option>
-                <option value="work">업무</option>
-                <option value="study">학업</option>
-            </select>
+            <select id="schedule-category"></select>
 
             <div id="repeat-ui-group" style="margin-top: 15px;">
                 <label>반복 설정</label>
@@ -87,12 +105,11 @@
                 </div>
             </div>
 
-            <button id="save-btn" class="save-btn">저장하기</button>
-            <button id="delete-btn" class="delete-btn" style="display: none;">삭제하기</button>
+            <button id="save-btn" class="save-btn" style="margin-top: 20px;">저장하기</button>
+            <button id="delete-btn" class="delete-btn" style="display: none; margin-top: 10px;">삭제하기</button>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <div id="category-modal" class="modal">
         <div class="modal-header">
             <h3>카테고리 관리</h3>
@@ -100,9 +117,7 @@
         </div>
         <div class="modal-content">
             <ul id="category-list" class="category-list"></ul>
-            
             <hr style="border: 0; border-top: 1px solid #3a3a3c; margin: 15px 0;">
-            
             <div style="display: flex; gap: 10px; align-items: center;">
                 <input type="color" id="new-category-color" value="#4f46e5" style="width: 50px; height: 40px; padding: 0; border: none; cursor: pointer;">
                 <input type="text" id="new-category-name" placeholder="새 카테고리 이름" style="flex: 1;">
@@ -110,6 +125,19 @@
             <button id="add-category-btn" class="save-btn" style="margin-top: 15px;">추가하기</button>
         </div>
     </div>
+
+    <div id="range-modal" class="modal">
+        <div class="modal-header">
+            <h3>범위/반복 일정 관리</h3>
+            <button id="close-range-btn" class="close-modal-btn">✕</button>
+        </div>
+        <div class="modal-content">
+            <p style="font-size: 13px; color: #888; margin-top:0; margin-bottom: 15px;">여러 날짜로 묶여 있는 일정들을 한 번에 수정하거나 삭제할 수 있습니다.</p>
+            <ul id="range-list" class="category-list"></ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js"></script>
 </body>
 </html>

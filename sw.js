@@ -1,25 +1,22 @@
-// 🎯 버전을 v1에서 v2로 전격 교체!
-const CACHE_NAME = 'planner-v2';
+// 🎯 버전 업그레이드!
+const CACHE_NAME = 'planner-v3';
 
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json',
-  '/icon.png'
+  './',
+  './index.html',
+  './style.css',
+  './app.js',
+  './manifest.json',
+  './icon.png'
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting(); // 매니저 즉시 투입
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
-// 🎯 [NEW] 핵심 마법: 옛날 버전(v1) 캐시를 찾아서 모조리 삭제해 버림!
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -31,15 +28,27 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // 즉시 권한 뺏어오기
   );
 });
 
+// 🎯 [핵심] 인터넷 먼저 (Network First) 전략
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        return response || fetch(event.request);
+        // 서버에서 최신 파일을 받아오면 캐시(창고)도 몰래 최신본으로 업데이트!
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return response; // 최신 화면 보여주기
+      })
+      .catch(() => {
+        // 인터넷이 끊겼거나 서버 에러 났을 때만 옛날 캐시 꺼내오기
+        return caches.match(event.request);
       })
   );
 });
