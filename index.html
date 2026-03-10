@@ -34,8 +34,9 @@
             <button id="view-toggle-btn" class="sidebar-menu-btn" style="margin-top: 10px;">📆 주간 보기</button>
             <button id="manage-category-btn" class="sidebar-menu-btn" style="margin-top: 10px;">🏷️ 카테고리 관리</button>
             <button id="manage-range-btn" class="sidebar-menu-btn" style="margin-top: 10px;">📅 범위/반복 일정 관리</button>
-            
-            
+            <button id="archive-link-btn" class="sidebar-menu-btn" style="margin-top: 10px;">
+                🌌 The Archive 
+            </button>
         </div>
     </div>
 
@@ -70,6 +71,14 @@
         <ul id="todo-list" class="todo-list"></ul>
     </div>
     <div id="overlay" class="overlay"></div>
+    <button id="quick-memo-btn" title="퀵 메모 열기">📝</button>
+    <div id="quick-memo-container" class="quick-memo-hidden">
+        <div class="quick-memo-header">
+            <span style="font-weight: bold; font-size: 14px;">📌 퀵 메모</span>
+            <button id="close-memo-btn">✖</button>
+        </div>
+        <textarea id="quick-memo-text" placeholder="번뜩이는 아이디어나 임시 메모를 적어두세요! (자동 저장)"></textarea>
+    </div>
 
     <div id="schedule-modal" class="modal">
         <div class="modal-header">

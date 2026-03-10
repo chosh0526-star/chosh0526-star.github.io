@@ -314,3 +314,116 @@ body.dark-mode #todo-sidebar-btn {
         text-overflow: ellipsis !important;
     }
 }
+
+/* ==========================================
+   📌 공중부양 퀵 메모 (플로팅 스티키 노트) 디자인
+========================================== */
+/* 1. 메모 여는 버튼 (왼쪽 하단 고정) */
+#quick-memo-btn {
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 30px !important;
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 50% !important;
+    background-color: #ffdeb3 !important; /* 포스트잇 감성의 노란색 */
+    color: #000000 !important;
+    border: 1px solid #e6c598 !important;
+    font-size: 24px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+    transition: all 0.3s ease !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+#quick-memo-btn:hover { transform: scale(1.1); }
+
+/* 2. 메모장 본체 (평소엔 숨어있다가 버튼 위로 뿅!) */
+#quick-memo-container {
+    position: fixed;
+    bottom: 90px;
+    left: 30px;
+    width: 280px;
+    height: 320px;
+    background-color: #fff9e6; /* 은은한 노란색 포스트잇 배경 */
+    border: 1px solid #f0e0b0;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: bottom left; /* 왼쪽 아래를 기준으로 커짐 */
+}
+
+/* 3. 메모장 숨김 상태 클래스 */
+.quick-memo-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.5) translateY(50px);
+    pointer-events: none;
+}
+
+/* 4. 메모장 헤더 (제목 & 닫기 버튼) */
+.quick-memo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #f7e8a4;
+    color: #555;
+    border-bottom: 1px solid #f0e0b0;
+}
+#close-memo-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #888;
+    transition: color 0.2s;
+}
+#close-memo-btn:hover { color: #ff3b30; }
+
+/* 5. 메모장 글씨 쓰는 공간 (텍스트 에어리어) */
+#quick-memo-text {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 15px;
+    font-size: 14px;
+    color: #333;
+    resize: none; /* 크기 조절 손잡이 제거 */
+    box-sizing: border-box;
+    outline: none;
+    line-height: 1.6;
+    font-family: inherit;
+}
+
+/* ==========================================
+   🌙 퀵 메모 다크 모드 (완벽한 딥-다크톤 매칭)
+========================================== */
+body.dark-mode #quick-memo-btn {
+    background-color: #3a3a3c !important;
+    border: 1px solid #2c2c2e !important;
+    color: #f2f2f7 !important;
+}
+body.dark-mode #quick-memo-container {
+    background-color: #2c2c2e !important;
+    border: 1px solid #3a3a3c !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+}
+body.dark-mode .quick-memo-header {
+    background-color: #1c1c1e !important;
+    color: #f2f2f7 !important;
+    border-bottom: 1px solid #3a3a3c !important;
+}
+body.dark-mode #quick-memo-text {
+    color: #f2f2f7 !important;
+}
+body.dark-mode #quick-memo-text::placeholder {
+    color: #8e8e93 !important;
+}

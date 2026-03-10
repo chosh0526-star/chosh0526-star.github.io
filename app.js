@@ -26,6 +26,21 @@ closeSidebarBtn.addEventListener('click', closeSidebar);
 sidebarOverlay.addEventListener('click', closeSidebar);
 
 // ==========================================
+// 🌌 The Archive 바로가기 연결
+// ==========================================
+const archiveLinkBtn = document.getElementById('archive-link-btn');
+
+if (archiveLinkBtn) {
+    archiveLinkBtn.addEventListener('click', () => {
+        // 사이드바를 살포시 닫아주고
+        closeSidebar(); 
+        
+        // 플래너가 꺼지지 않게 '새 탭(_blank)'으로 The Archive 열기!
+        window.open('https://akffkdgoawwl.vercel.app/', '_blank'); 
+    });
+}
+
+// ==========================================
 // 공통 변수 및 UI 요소
 // ==========================================
 const monthYearDisplay = document.getElementById('month-year-display');
@@ -76,7 +91,6 @@ let currentEditId = null;
 let currentEditGroupId = null; 
 let isWeeklyView = false;
 
-// 🎯 파트너님이 요청하신 이모티콘 고정!
 viewToggleBtn.addEventListener('click', () => {
     isWeeklyView = !isWeeklyView;
     viewToggleBtn.textContent = isWeeklyView ? '🗓️ 월간 보기' : '📆 주간 보기';
@@ -102,7 +116,7 @@ scheduleRepeatInput.addEventListener('change', (e) => {
 });
 
 // ==========================================
-// 🏷️ 카테고리 로직 (순서 변경 완벽 개선판 🚀)
+// 🏷️ 카테고리 로직
 // ==========================================
 manageCategoryBtn.addEventListener('click', () => {
     closeSidebar();
@@ -111,18 +125,13 @@ manageCategoryBtn.addEventListener('click', () => {
 });
 
 async function loadCategories() {
-    // 순서 번호(sort_order) 기준으로 가져오기
     const { data, error } = await supabaseClient.from('categories').select('*').order('sort_order', { ascending: true });
     
-    if (error) {
-        console.error("카테고리 에러:", error);
-    } else {
+    if (!error) {
         categoriesList = data;
         renderCategoryManager();
         updateCategoryDropdown();
     }
-    
-    // 에러가 나든 안 나든 캘린더는 무조건 그리기!
     loadSchedules(); 
 }
 
@@ -146,37 +155,31 @@ function renderCategoryManager() {
         categoryListUl.appendChild(li);
     });
 
-    // 🎯 ▲ 위로 이동 (배열 위치 바꾸고 전체 번호표 깔끔하게 재정렬)
     document.querySelectorAll('.move-up-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const index = parseInt(e.target.getAttribute('data-index'));
             if (index > 0) {
-                // 1. 메모리상에서 둘의 위치를 맞바꿈
                 const temp = categoriesList[index];
                 categoriesList[index] = categoriesList[index - 1];
                 categoriesList[index - 1] = temp;
 
-                // 2. 바뀐 순서대로 0, 1, 2... 번호표를 전체 데이터에 싹 다시 덮어씌움! (버그 원천 차단)
                 const updates = categoriesList.map((cat, i) => 
                     supabaseClient.from('categories').update({ sort_order: i }).eq('id', cat.id)
                 );
-                await Promise.all(updates); // 한방에 저장 처리
+                await Promise.all(updates);
                 loadCategories();
             }
         });
     });
 
-    // 🎯 ▼ 아래로 이동
     document.querySelectorAll('.move-down-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const index = parseInt(e.target.getAttribute('data-index'));
             if (index < categoriesList.length - 1) {
-                // 1. 메모리상에서 둘의 위치를 맞바꿈
                 const temp = categoriesList[index];
                 categoriesList[index] = categoriesList[index + 1];
                 categoriesList[index + 1] = temp;
 
-                // 2. 바뀐 순서대로 0, 1, 2... 번호표 싹 다시 덮어씌움
                 const updates = categoriesList.map((cat, i) => 
                     supabaseClient.from('categories').update({ sort_order: i }).eq('id', cat.id)
                 );
@@ -213,8 +216,6 @@ addCategoryBtn.addEventListener('click', async () => {
     if (!name) return alert('이름을 입력하세요!');
 
     addCategoryBtn.textContent = '처리 중...';
-    
-    // 🎯 새 카테고리는 무조건 리스트의 제일 마지막 번호(length)를 부여받음
     const newSortOrder = categoriesList.length; 
     
     await supabaseClient.from('categories').insert([{ name, color, sort_order: newSortOrder }]);
@@ -228,10 +229,7 @@ addCategoryBtn.addEventListener('click', async () => {
 // ==========================================
 async function loadSchedules() {
     const { data, error } = await supabaseClient.from('schedules').select('*');
-    if (!error) { 
-        schedulesList = data; 
-    }
-    // 🎯 데이터가 있든 없든 뼈대는 무조건 그리기!
+    if (!error) { schedulesList = data; }
     renderCalendar(); 
 }
 
@@ -381,13 +379,16 @@ function renderRangeManager() {
             const m = lastDate.match(/(\d+)년 (\d+)월 (\d+)일/);
             const formattedEnd = `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
             
+            // 🎯 범위 일정 그룹 통째로 수정 시 입력칸과 글씨 모두 다시 보이기!
             scheduleRangeEndInput.value = formattedEnd;
             scheduleRangeEndInput.style.display = 'block';
+            const rangeEndLabel = scheduleRangeEndInput.previousElementSibling;
+            if(rangeEndLabel) rangeEndLabel.style.display = 'block';
 
             repeatUiGroup.style.display = 'none';
             scheduleRepeatInput.value = 'none';
 
-            modalTitle.textContent = '범위 일정 [그룹 통째로 수정]';
+            modalTitle.textContent = '범위 일정 [그룹 수정]';
             saveBtn.textContent = '수정 적용하기';
             deleteBtn.style.display = 'none';
 
@@ -409,7 +410,7 @@ function renderRangeManager() {
 }
 
 // ==========================================
-// 🎯 일정 저장 및 삭제
+// 🎯 일정 저장 및 삭제 (라벨 숨김 완벽 적용)
 // ==========================================
 function openModal(dateString, schedule = null) {
     scheduleDateInput.value = dateString;
@@ -418,12 +419,19 @@ function openModal(dateString, schedule = null) {
     currentEditGroupId = null; 
     deleteBtn.textContent = '삭제하기'; 
 
+    // 🎯 종료일 글씨(라벨) 찾아내기
+    const rangeEndLabel = scheduleRangeEndInput ? scheduleRangeEndInput.previousElementSibling : null;
+
     if (schedule) {
         currentEditId = schedule.id;
         scheduleTitleInput.value = schedule.title;
         scheduleCategoryInput.value = schedule.category;
         
-        if(scheduleRangeEndInput) scheduleRangeEndInput.style.display = 'none';
+        // 🎯 개별 일정 수정 시 입력칸 + 글씨 모두 완벽하게 숨김!
+        if(scheduleRangeEndInput) {
+            scheduleRangeEndInput.style.display = 'none';
+            if(rangeEndLabel) rangeEndLabel.style.display = 'none'; 
+        }
         if(repeatUiGroup) repeatUiGroup.style.display = 'none';
 
         modalTitle.textContent = '개별 일정 수정';
@@ -434,8 +442,10 @@ function openModal(dateString, schedule = null) {
         scheduleTitleInput.value = '';
         if(categoriesList.length > 0) scheduleCategoryInput.value = categoriesList[0].name; 
         
+        // 🎯 새 일정 추가 시 입력칸 + 글씨 모두 다시 보임!
         if(scheduleRangeEndInput) {
             scheduleRangeEndInput.style.display = 'block';
+            if(rangeEndLabel) rangeEndLabel.style.display = 'block';
             scheduleRangeEndInput.value = '';
         }
         if(repeatUiGroup) repeatUiGroup.style.display = 'block';
@@ -594,6 +604,9 @@ async function loadTodos() {
     }
 }
 
+// ==========================================
+// 2. 화면에 투두리스트 그리기 (서버 저장 완벽 대기 로직 추가 🚀)
+// ==========================================
 function renderTodos() {
     todoListUl.innerHTML = '';
     
@@ -626,17 +639,29 @@ function renderTodos() {
         todoListUl.appendChild(li);
     });
 
+    // 🎯 체크박스 이벤트 (안전장치 탑재)
     document.querySelectorAll('.todo-checkbox').forEach(box => {
-        box.addEventListener('change', (e) => {
+        box.addEventListener('change', async (e) => { // 👈 async 추가됨!
             const id = e.target.getAttribute('data-id');
             const is_completed = e.target.checked;
             const liElement = e.target.closest('.todo-item');
 
-            supabaseClient.from('todos').update({ is_completed }).eq('id', id);
+            // 1. 서버에 진짜로 저장이 완료될 때까지 기다리기 (await 추가)
+            const { error } = await supabaseClient.from('todos').update({ is_completed }).eq('id', id);
             
+            // 만약 Supabase에서 에러를 뱉어내면 (예: RLS 권한 문제 등)
+            if (error) {
+                alert('저장 실패! Supabase에서 todos 표의 RLS(보안)가 꺼져있는지 확인해주세요.');
+                console.error(error);
+                e.target.checked = !is_completed; // 화면의 체크박스도 원래대로 강제 복구!
+                return;
+            }
+            
+            // 2. 서버 저장이 성공적으로 끝난 뒤에만 로컬 메모리 업데이트!
             const targetTodo = todosList.find(t => t.id == id);
             if(targetTodo) targetTodo.is_completed = is_completed;
 
+            // 3. 그리고 나서 안심하고 페이드아웃 애니메이션 실행
             if (((currentTodoFilter === 'active' || currentTodoFilter === 'main') && is_completed) || 
                 (currentTodoFilter === 'completed' && !is_completed)) {
                 
@@ -649,13 +674,21 @@ function renderTodos() {
         });
     });
 
+    // 🎯 삭제 이벤트 (휴지통도 안전장치 탑재)
     document.querySelectorAll('.todo-delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => { // 👈 async 추가됨!
             const id = e.target.getAttribute('data-id');
             const liElement = e.target.closest('.todo-item');
             
+            // 삭제 역시 서버에서 완전히 지워질 때까지 기다림
+            const { error } = await supabaseClient.from('todos').delete().eq('id', id);
+            
+            if (error) {
+                alert('삭제 실패! 인터넷 연결이나 RLS 설정을 확인해주세요.');
+                return;
+            }
+
             liElement.classList.add('fade-out-item'); 
-            supabaseClient.from('todos').delete().eq('id', id); 
             todosList = todosList.filter(t => t.id != id); 
             
             setTimeout(() => { renderTodos(); }, 300); 
@@ -687,6 +720,48 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(console.error); });
 }
 
+// ==========================================
+// 📌 퀵 메모 (Floating Sticky Note) 로직
+// ==========================================
+const quickMemoBtn = document.getElementById('quick-memo-btn');
+const quickMemoContainer = document.getElementById('quick-memo-container');
+const closeMemoBtn = document.getElementById('close-memo-btn');
+const quickMemoText = document.getElementById('quick-memo-text');
+
+// 1. 메모장 열기/닫기 토글 애니메이션
+if (quickMemoBtn && quickMemoContainer) {
+    quickMemoBtn.addEventListener('click', () => {
+        quickMemoContainer.classList.toggle('quick-memo-hidden');
+        
+        // 창이 열리면 바로 타자를 칠 수 있게 커서를 자동으로 깜빡이게 해줌 (디테일!)
+        if (!quickMemoContainer.classList.contains('quick-memo-hidden')) {
+            setTimeout(() => { quickMemoText.focus(); }, 100); 
+        }
+    });
+}
+
+// 2. 닫기(X) 버튼 누르면 닫히기
+if (closeMemoBtn) {
+    closeMemoBtn.addEventListener('click', () => {
+        quickMemoContainer.classList.add('quick-memo-hidden');
+    });
+}
+
+// 3. 브라우저 로컬 저장소(localStorage)를 활용한 초고속 자동 저장!
+if (quickMemoText) {
+    // 앱을 처음 켰을 때, 내 브라우저에 저장되어 있던 메모를 싹 불러옴
+    const savedMemo = localStorage.getItem('quickMemoData');
+    if (savedMemo) {
+        quickMemoText.value = savedMemo;
+    }
+
+    // 키보드를 하나 칠 때마다(input 이벤트) 0.001초 만에 자동 저장!
+    quickMemoText.addEventListener('input', (e) => {
+        localStorage.setItem('quickMemoData', e.target.value);
+    });
+}
+
 // 🚀 앱 최초 실행
 loadCategories();
 loadTodos();
+
